@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS hotel_booking_db_schema;
