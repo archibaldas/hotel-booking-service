@@ -1,19 +1,36 @@
 server:
   port: 8080
+  error:
+    include-binding-errors: always
+    include-message: always
+    include-stacktrace: never
 
 spring:
   application:
     name: HotelBookingService
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/hotel_booking_db}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    #url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/hotel_booking_db}
+    url: jdbc:postgresql://localhost:5432/hotel_booking_db
+    #username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    username: postgres
+    #password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
+    properties:
+      hibernate:
+        default_schema: hotel_booking_schema
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
+      #ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+      ddl-auto: update
     show-sql: true
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+  web:
+    resources:
+      add-mappings: false
 
 logging:
   level:
