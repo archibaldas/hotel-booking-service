@@ -2,10 +2,10 @@ package com.example.hotel_booking_service.model.service;
 
 import java.util.List;
 
-public interface CRUDService <E, R>{
-    List<E> findAll();
+public interface CRUDService <D, E, R>{
+    List<D> findAll();
     E findById (Long id);
-    E create (R request);
-    E update (Long id, R request);
+    D create (R request);
+    D update (Long id, R request);
     void deleteById(Long id);
 }

@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Range;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "hotels", schema = "hotel_booking_schema")
@@ -45,4 +47,8 @@ public class Hotel {
     @Column(name = "rating_count", nullable = false)
     @Builder.Default
     private Integer ratingCount = 0;
+
+    @OneToMany(mappedBy = "hotel", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Room> rooms = new ArrayList<>();
 }

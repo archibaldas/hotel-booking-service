@@ -23,15 +23,21 @@ public class GlobalExceptionHandler {
         return getErrorResponse(HttpStatus.BAD_REQUEST, ex);
     }
 
+    @ExceptionHandler(NotChangeDataException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleChangeUpdatableData(NotChangeDataException ex) {
+        return getErrorResponse(HttpStatus.BAD_REQUEST, ex);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
         return getErrorResponse(HttpStatus.BAD_REQUEST, ex);
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleGenericException(Exception ex) {
-        return getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
-    }
+//    @ExceptionHandler(Exception.class)
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public ErrorResponse handleGenericException(Exception ex) {
+//        return getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
+//    }
 }

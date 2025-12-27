@@ -2,10 +2,14 @@ package com.example.hotel_booking_service.model.service.impl;
 
 import com.example.hotel_booking_service.exception.NoFoundEntityException;
 import com.example.hotel_booking_service.model.entity.Hotel;
+import com.example.hotel_booking_service.model.entity.Room;
 import com.example.hotel_booking_service.model.repository.HotelRepository;
 import com.example.hotel_booking_service.model.service.HotelService;
 import com.example.hotel_booking_service.web.dto.request.HotelRequestDto;
+import com.example.hotel_booking_service.web.dto.response.HotelResponseDto;
+import com.example.hotel_booking_service.web.dto.response.RoomResponseDto;
 import com.example.hotel_booking_service.web.mapper.HotelMapper;
+import com.example.hotel_booking_service.web.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,24 +25,31 @@ public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository hotelRepository;
     private final HotelMapper hotelMapper;
+    private final RoomMapper roomMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public List<Hotel> findAll() {
+    public List<HotelResponseDto> findAll() {
         log.info("Получение полного списка отелей");
-        return hotelRepository.findAll();
+        return hotelRepository.findAll().stream()
+                .map(h -> {
+                    HotelResponseDto response = hotelMapper.toResponseDto(h);
+                    response.setRooms(roomsToRoomResponseList(h.getRooms()));
+                    return response;
+                })
+                .toList();
     }
 
     @Override
     @Transactional
-    public Hotel create(HotelRequestDto request) {
+    public HotelResponseDto create(HotelRequestDto request) {
         log.info("Создание и занесение данных отеля c именем: {} в базу данных",request.getName());
         if (isExistingHotel(request.getName(), request.getCity())) {
             throw new IllegalArgumentException("Отель с таким названием уже существует в этом городе");
         }
         Hotel hotel = hotelRepository.save(hotelMapper.toEntity(request));
         log.info("Отель внесен в базу данных с Id: {}", hotel.getId());
-        return hotel;
+        return hotelMapper.toResponseDto(hotel);
     }
 
     @Override
@@ -51,7 +62,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional
-    public Hotel update(Long id, HotelRequestDto request) {
+    public HotelResponseDto update(Long id, HotelRequestDto request) {
         log.info(" Обновление данных отеля с Id: {}", id);
 
         Hotel hotel = findById(id);
@@ -61,7 +72,9 @@ public class HotelServiceImpl implements HotelService {
         }
         hotel = hotelRepository.save(hotelMapper.updateEntityFromDto(request, hotel));
         log.info("Данные отеля с Id: {} обновлены", id);
-        return hotel;
+        HotelResponseDto responseDto = hotelMapper.toResponseDto(hotel);
+        responseDto.setRooms(roomsToRoomResponseList(hotel.getRooms()));
+        return responseDto;
     }
 
     @Override
@@ -70,6 +83,14 @@ public class HotelServiceImpl implements HotelService {
 
         hotelRepository.delete(findById(id));
         log.info("Отель с Id: {} удален", id);
+    }
+
+    @Override
+    public HotelResponseDto getHotelResponseById(Long id) {
+        Hotel hotel = findById(id);
+        HotelResponseDto hotelResponseDto = hotelMapper.toResponseDto(hotel);
+        hotelResponseDto.setRooms(roomsToRoomResponseList(hotel.getRooms()));
+        return hotelResponseDto;
     }
 
     private boolean isUpdatableHotel(Hotel hotel, String name, String city){
@@ -81,12 +102,9 @@ public class HotelServiceImpl implements HotelService {
         return hotelRepository.existsByNameAndCity(name, city);
     }
 
-
-
-
-
-
-
+    private List<RoomResponseDto> roomsToRoomResponseList(List<Room>rooms){
+        return rooms.stream().map(roomMapper::toResponseDto).toList();
+    }
 
 
 

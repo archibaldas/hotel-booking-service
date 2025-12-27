@@ -1,11 +1,12 @@
 package com.example.hotel_booking_service.web.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -20,5 +21,6 @@ public class HotelResponseDto {
     private Double distanceFromCenter;
     private Double rating;
     private Integer ratingCount;
+    private List<RoomResponseDto> rooms;
 
 }
