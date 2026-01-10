@@ -1,22 +1,23 @@
 package com.example.hotel_booking_service.model.service.impl;
 
+
 import com.example.hotel_booking_service.exception.NoFoundEntityException;
+import com.example.hotel_booking_service.exception.NotChangeDataException;
 import com.example.hotel_booking_service.model.entity.Booking;
-import com.example.hotel_booking_service.model.entity.Room;
-import com.example.hotel_booking_service.model.entity.User;
+
 import com.example.hotel_booking_service.model.repository.BookingRepository;
+import com.example.hotel_booking_service.model.service.BookingService;
 import com.example.hotel_booking_service.model.service.RoomService;
 import com.example.hotel_booking_service.model.service.UserService;
 import com.example.hotel_booking_service.web.dto.request.BookingRequestDto;
 import com.example.hotel_booking_service.web.dto.response.BookingResponseDto;
-import com.example.hotel_booking_service.web.dto.response.RoomResponseDto;
-import com.example.hotel_booking_service.web.dto.response.UserResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Book;
 import java.util.List;
 
 @Service
@@ -28,54 +29,63 @@ public class BookingServiceImpl implements BookingService {
     private final RoomService roomService;
     private final BookingRepository bookingRepository;
 
-   @Override
+    @Override
     @Transactional(readOnly = true)
     public List<BookingResponseDto> findAll() {
         List<Booking> bookingList = bookingRepository.findAll();
       return bookingList.stream()
-          .map(b -> toResponseDto(b))
+          .map(this::toResponseDto)
           .toList();
     }
 
     @Override
     @Transactional
     public BookingResponseDto create(BookingRequestDto request) {
-        
-      return null;
+        if(roomService.isExistingPeriod(request.getRoomId(), request.getArrivalDate(), request.getDepartureDate()))
+            throw new NotChangeDataException("В периоде с " + request.getArrivalDate() + " по " +
+                    request.getDepartureDate() + " для комнаты с Id" + request.getRoomId() + " есть резервированные даты.");
+       return toResponseDto(bookingRepository.save(toEntity(request)));
     }
 
    @Override
     @Transactional(readOnly = true)
     public Booking findById(Long id) {
-      return null;
+      return bookingRepository.findById(id)
+              .orElseThrow(() -> new NoFoundEntityException("Бронирование с ID: " + id + " найдено."));
     }
 
     @Override
     @Transactional
     public BookingResponseDto update(Long id, BookingRequestDto request) {
-  
-        return null;
+        Booking updatedBooking = findById(id);
+        if(!updatedBooking.getUser().getId().equals(request.getUserId()))
+            throw new NotChangeDataException("Изменить данные бронирования может только пользователь который зарезервировал бронь.");
+        if(roomService.isExistingPeriod(request.getRoomId(), request.getArrivalDate(), request.getDepartureDate()))
+            throw new NotChangeDataException("В периоде с " + request.getArrivalDate() + " по " +
+                    request.getDepartureDate() + " для комнаты с Id" + request.getRoomId() + " есть резервированные даты.");
+        roomService.clearBookingDates(updatedBooking.getRoom().getId(),
+                updatedBooking.getArrivalDate(),
+                updatedBooking.getDepartureDate());
+        Booking booking = toEntity(request);
+        booking.setId(id);
+        return toResponseDto(bookingRepository.save(booking));
     }
 
     @Override
     public void deleteById(Long id) {
+        Booking booking = findById(id);
+        roomService.clearBookingDates(booking.getRoom().getId(),
+                booking.getArrivalDate(),
+                booking.getDepartureDate());
+        bookingRepository.delete(booking);
     }
 
     private Booking toEntity(BookingRequestDto request){
         Booking booking = new Booking();
         booking.setUser(userService.findById(request.getUserId()));
-        Room room = roomService.findById(request.getRoomId());
-        room = roomService.update(room.getId(), new RoomRequestDto(
-            room.getName,
-            room.getDescription,
-            room.getNumber,
-            room.getPrice,
-            room.getMaxPeople,
-            createUnavailebleDateListForRoom(request.getArrivalDate(),
-                                             request.getDepartureDate()),
-            room.getHotel.getId();
-        )
-        booking.setRoom(room);
+        booking.setRoom(roomService.bookingDates(request.getRoomId(),
+                request.getArrivalDate(),
+                request.getDepartureDate()));
         booking.setArrivalDate(request.getArrivalDate());
         booking.setDepartureDate(request.getDepartureDate());
         return booking;
@@ -84,32 +94,10 @@ public class BookingServiceImpl implements BookingService {
     private BookingResponseDto toResponseDto(Booking booking) {
         BookingResponseDto response = new BookingResponseDto();
         response.setId(booking.getId());
-        response.setUser(userService.getUserById(booking.getUser.getId()));
-        response.setRoom(roomService.getRoomById(booking.getRoom.getId()));
+        response.setUserResponseDto(userService.getUserById(booking.getUser().getId()));
+        response.setRoomResponseDto(roomService.getRoomResponseById(booking.getRoom().getId()));
         response.setArrivalDate(booking.getArrivalDate());
         response.setDepartureDate(booking.getDepartureDate());
         return response;
     }
-
-    private List<LocalDate> createUnavailebleDateListForRoom(LocalDate arrival, LocalDate departure, Room room){
-        long daysBetween = ChronoUnit.DAYS.between(arrival,departure);
-        List<LocalDate> unavailableDateList = new ArrayList();
-        List<LocalDate> unavailableDataListFromRoom = getUnavailableDates(room.getUnavailableDates());
-        for (int i = 0; i <= daysBetwen; i++){
-            LocalDate date = arrival.plusDays(i);
-            if(unavailableDataListFromRoom.contains(date){
-                throw new NotChangeDataException("В периоде бронирования есть зарезервированные даты");
-            }
-            unavailableDateList.add(date);
-        }
-        return unavailableDateList;
-    }
-
-    private List<LocalDate> getUnavailableDates(List<UnavailableDate> dates){
-        return dates.stream()
-            .map(d -> d.getUnavailableDate())
-            .toList();
-    }
-
-  
 }

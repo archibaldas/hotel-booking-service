@@ -1,13 +1,9 @@
 package com.example.hotel_booking_service.model.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Range;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

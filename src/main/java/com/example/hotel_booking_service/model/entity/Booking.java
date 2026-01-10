@@ -3,6 +3,8 @@ package com.example.hotel_booking_service.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "booking", schema  = "hotel_booking_schema")
 @Setter
@@ -27,7 +29,7 @@ public class Booking{
   private Room room;
 
   @ManyToOne
-  @JoinColumn(name = "room_id")
+  @JoinColumn(name = "user_id")
   private User user;
   
 }

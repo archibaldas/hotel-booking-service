@@ -10,7 +10,8 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "unavailable_dates", schema = "hotel_booking_schema", uniqueConstraints = @UniqueConstraint(
-        columnNames = {"room_id, unavailable_date"}
+        name = "uq_room_id_unavailable_date",
+        columnNames = {"room_id", "unavailable_date"}
         ))
 @AllArgsConstructor
 @NoArgsConstructor

@@ -35,6 +35,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("net.javacrumbs.json-unit:json-unit:2.38.0")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
+    testImplementation("org.testcontainers:postgresql:1.17.6")
+
 }
 
 tasks.withType<Test> {
