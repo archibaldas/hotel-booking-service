@@ -6,6 +6,7 @@ import com.example.hotel_booking_service.web.dto.response.RoomResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,12 +24,14 @@ public class RoomController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public RoomResponseDto createRoom(@Valid @RequestBody RoomRequestDto roomRequestDto){
         return roomService.create(roomRequestDto);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public RoomResponseDto updatedRoom(@PathVariable Long id,
                                        @Valid @RequestBody RoomRequestDto roomRequestDto){
         return roomService.update(id, roomRequestDto);
@@ -36,6 +39,7 @@ public class RoomController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public void deleteRoom (@PathVariable Long id){
         roomService.deleteById(id);
     }

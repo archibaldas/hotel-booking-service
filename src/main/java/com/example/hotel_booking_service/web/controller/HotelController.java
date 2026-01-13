@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class HotelController {
     @PostMapping
     @Operation(summary = "Создать новый отель")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public HotelResponseDto createHotel(@Valid @RequestBody HotelRequestDto requestDto) {
         return hotelService.create(requestDto);
     }
@@ -45,6 +47,7 @@ public class HotelController {
     @PutMapping("/{id}")
     @Operation(summary = "Обновить отель")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public HotelResponseDto updateHotel(
             @PathVariable Long id,
             @Valid @RequestBody HotelRequestDto requestDto) {
@@ -54,6 +57,7 @@ public class HotelController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить отель (физическое удаление)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteHotel(@PathVariable Long id) {
         hotelService.deleteById(id);
     }

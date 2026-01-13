@@ -6,6 +6,7 @@ import com.example.hotel_booking_service.web.dto.request.UserRequestDto;
 import com.example.hotel_booking_service.web.dto.response.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +18,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public UserResponseDto getUserById(@PathVariable Long id){
         return userService.getUserById(id);
     }
@@ -27,7 +29,7 @@ public class UserController {
         return userService.getUserByUsername(username);
     }
 
-    @PostMapping
+    @PostMapping("/registration")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDto createNewUser(@RequestBody UserRequestDto userRequestDto,
                                          @RequestParam RoleType roleType){

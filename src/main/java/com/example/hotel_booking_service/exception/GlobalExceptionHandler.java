@@ -2,6 +2,7 @@ package com.example.hotel_booking_service.exception;
 
 import com.example.hotel_booking_service.web.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -34,6 +35,19 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
         return getErrorResponse(HttpStatus.BAD_REQUEST, ex);
     }
+
+    @ExceptionHandler(NotAuthorizationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleUnauthorizedException(NotAuthorizationException ex){
+        return getErrorResponse(HttpStatus.UNAUTHORIZED, ex);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccessDeniedException(AccessDeniedException e){
+        return getErrorResponse(HttpStatus.FORBIDDEN, e);
+    }
+
 
 //    @ExceptionHandler(Exception.class)
 //    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

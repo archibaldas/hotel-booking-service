@@ -1,11 +1,12 @@
 package com.example.hotel_booking_service.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Builder
 @Entity
 @Table(name = "users", schema = "hotel_booking_schema")
 @AllArgsConstructor
@@ -18,11 +19,14 @@ public class User {
     private Long id;
     @Column(name = "username", unique = true, nullable = false, length = 50)
     private String username;
-    @Column(name = "password", nullable = false, length = 50)
+    @Column(name = "password", nullable = false)
     private String password;
     @Column(name = "email", nullable = false, unique = true, length = 50)
     private String email;
-    @Column(name = "role_type", nullable = false)
-    @Enumerated(value = EnumType.STRING)
-    private RoleType roleType;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @Builder.Default
+    private List<UserRole> roles = new ArrayList<>();
 }

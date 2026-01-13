@@ -1,10 +1,7 @@
 package com.example.hotel_booking_service;
 
 import com.example.hotel_booking_service.exception.NoFoundEntityException;
-import com.example.hotel_booking_service.model.entity.Hotel;
-import com.example.hotel_booking_service.model.entity.RoleType;
-import com.example.hotel_booking_service.model.entity.Room;
-import com.example.hotel_booking_service.model.entity.User;
+import com.example.hotel_booking_service.model.entity.*;
 import com.example.hotel_booking_service.model.repository.BookingRepository;
 import com.example.hotel_booking_service.model.repository.HotelRepository;
 import com.example.hotel_booking_service.model.repository.RoomRepository;
@@ -22,6 +19,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +32,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Testcontainers
@@ -42,8 +41,8 @@ import java.util.List;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractIntegrationTest {
 
-    private static final String USER_PARAM = "test-user";
-    private static final String ADMIN_PARAM = "test-admin";
+    protected static final String USER_PARAM = "test-user";
+    protected static final String ADMIN_PARAM = "test-admin";
     private static final int hotelCount = 3;
 
     protected Long userId;
@@ -123,23 +122,31 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
+
 
 
 
     protected void createUsers(){
+        UserRole role = UserRole.from(RoleType.USER);
         User user = new User();
         user.setUsername(USER_PARAM);
-        user.setPassword(USER_PARAM);
+        user.setPassword(passwordEncoder.encode(USER_PARAM));
         user.setEmail(USER_PARAM + "@mail.ru");
-        user.setRoleType(RoleType.USER);
+        user.setRoles(Collections.singletonList(role));
+        role.setUser(user);
         user = userRepository.save(user);
         userId = user.getId();
 
+        role = UserRole.from(RoleType.ADMIN);
+
         User admin = new User();
         admin.setUsername(ADMIN_PARAM);
-        admin.setPassword(ADMIN_PARAM);
+        admin.setPassword(passwordEncoder.encode(ADMIN_PARAM));
         admin.setEmail(ADMIN_PARAM + "@mail.ru");
-        admin.setRoleType(RoleType.ADMIN);
+        admin.setRoles(Collections.singletonList(role));
+        role.setUser(admin);
         admin = userRepository.save(admin);
         adminId = admin.getId();
     }

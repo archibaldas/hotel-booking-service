@@ -16,9 +16,6 @@ public class UserRequestDto {
     @Min(value = 3, message = "Длинна имени пользователя не может быть меньше 3-ех знаков")
     @Max(value = 50, message = "Длинна имени пользователя не может превышать 50 знаков")
     private String username;
-    @NotBlank(message = "Пароль не может быть пустым")
-    @Min(value = 6, message = "Длинна пароля не может быть меньше 6 знаков")
-    @Max(value = 50, message = "Длинна пароля не может превышать 50 знаков")
     private String password;
     @NotBlank(message = "Адрес электронной почты не может быть пустым")
     @Email(message = "Не верный формат электронной почты")
