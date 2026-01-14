@@ -6,4 +6,5 @@ import com.example.hotel_booking_service.web.dto.response.HotelResponseDto;
 
 public interface HotelService extends CRUDService<HotelResponseDto, Hotel, HotelRequestDto> {
     HotelResponseDto getHotelResponseById(Long id);
+    HotelResponseDto updateHotelRating(Long id, int newMark);
 }

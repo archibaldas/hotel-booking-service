@@ -61,4 +61,11 @@ public class HotelController {
     public void deleteHotel(@PathVariable Long id) {
         hotelService.deleteById(id);
     }
+
+    @PutMapping("/rating/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public HotelResponseDto updateHotelRating(@PathVariable Long id,
+                                  @RequestParam int newMark){
+        return hotelService.updateHotelRating(id, newMark);
+    }
 }

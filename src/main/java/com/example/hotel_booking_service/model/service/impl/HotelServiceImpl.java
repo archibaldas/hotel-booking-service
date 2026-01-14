@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.example.hotel_booking_service.utils.RatingCalculator.getNewRating;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -91,6 +93,24 @@ public class HotelServiceImpl implements HotelService {
         HotelResponseDto hotelResponseDto = hotelMapper.toResponseDto(hotel);
         hotelResponseDto.setRooms(roomsToRoomResponseList(hotel.getRooms()));
         return hotelResponseDto;
+    }
+
+    @Override
+    public HotelResponseDto updateHotelRating(Long id, int newMark) {
+        Hotel hotel = findById(id);
+        int numberOfRating = hotel.getRatingCount();
+        double newRating;
+        if(numberOfRating == 0){
+            newRating = newMark;
+        }
+        else {
+            double rating = hotel.getRating();
+            newRating = getNewRating(numberOfRating, rating, newMark);
+        }
+        numberOfRating += 1;
+        hotel.setRatingCount(numberOfRating);
+        hotel.setRating(newRating);
+        return hotelMapper.toResponseDto(hotelRepository.save(hotel));
     }
 
     private boolean isUpdatableHotel(Hotel hotel, String name, String city){
