@@ -3,15 +3,19 @@ package com.example.hotel_booking_service.model.service.impl;
 import com.example.hotel_booking_service.exception.NoFoundEntityException;
 import com.example.hotel_booking_service.model.entity.Hotel;
 import com.example.hotel_booking_service.model.entity.Room;
+import com.example.hotel_booking_service.model.filter.HotelFilter;
 import com.example.hotel_booking_service.model.repository.HotelRepository;
 import com.example.hotel_booking_service.model.service.HotelService;
+import com.example.hotel_booking_service.model.specification.HotelSpecification;
 import com.example.hotel_booking_service.web.dto.request.HotelRequestDto;
+import com.example.hotel_booking_service.web.dto.response.HotelListResponseDto;
 import com.example.hotel_booking_service.web.dto.response.HotelResponseDto;
 import com.example.hotel_booking_service.web.dto.response.RoomResponseDto;
 import com.example.hotel_booking_service.web.mapper.HotelMapper;
 import com.example.hotel_booking_service.web.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +92,11 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    public Long getCount() {
+        return hotelRepository.count();
+    }
+
+    @Override
     public HotelResponseDto getHotelResponseById(Long id) {
         Hotel hotel = findById(id);
         HotelResponseDto hotelResponseDto = hotelMapper.toResponseDto(hotel);
@@ -113,6 +122,26 @@ public class HotelServiceImpl implements HotelService {
         return hotelMapper.toResponseDto(hotelRepository.save(hotel));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public HotelListResponseDto findAllByFilter(HotelFilter filter) {
+        List<Hotel> filterList = hotelRepository.findAll(HotelSpecification.withFilter(filter),
+                PageRequest.of(filter.getPageNumber(), filter.getPageSize())).getContent();
+        HotelListResponseDto listResponseDto = new HotelListResponseDto();
+        List<HotelResponseDto> responseDtos = filterList.stream().map(h -> {
+            HotelResponseDto response = hotelMapper.toResponseDto(h);
+            response.setRooms(h.getRooms().stream()
+                    .map(roomMapper::toResponseDto)
+                    .toList());
+            return response;
+        }).toList();
+        listResponseDto.setHotels(responseDtos);
+        listResponseDto.setPageNumber(filter.getPageNumber());
+        listResponseDto.setPageSize(filter.getPageSize());
+        listResponseDto.setTotalCount(getCount());
+        return listResponseDto;
+    }
+
     private boolean isUpdatableHotel(Hotel hotel, String name, String city){
         return (!hotel.getName().equals(name) ||
                 !hotel.getCity().equals(city)) && isExistingHotel(name, city);
@@ -125,7 +154,4 @@ public class HotelServiceImpl implements HotelService {
     private List<RoomResponseDto> roomsToRoomResponseList(List<Room>rooms){
         return rooms.stream().map(roomMapper::toResponseDto).toList();
     }
-
-
-
 }

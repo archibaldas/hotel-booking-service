@@ -86,6 +86,11 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public Long getCount() {
+        return 0L;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public RoomResponseDto getRoomResponseById(Long id) {
         Room room = findById(id);

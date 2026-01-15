@@ -8,4 +8,5 @@ public interface CRUDService <D, E, R>{
     D create (R request);
     D update (Long id, R request);
     void deleteById(Long id);
+    Long getCount();
 }

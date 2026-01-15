@@ -80,6 +80,11 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.delete(booking);
     }
 
+    @Override
+    public Long getCount() {
+        return 0L;
+    }
+
     private Booking toEntity(BookingRequestDto request){
         Booking booking = new Booking();
         booking.setUser(userService.findById(request.getUserId()));

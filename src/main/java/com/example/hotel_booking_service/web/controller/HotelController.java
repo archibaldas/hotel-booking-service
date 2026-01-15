@@ -1,7 +1,9 @@
 package com.example.hotel_booking_service.web.controller;
 
+import com.example.hotel_booking_service.model.filter.HotelFilter;
 import com.example.hotel_booking_service.model.service.HotelService;
 import com.example.hotel_booking_service.web.dto.request.HotelRequestDto;
+import com.example.hotel_booking_service.web.dto.response.HotelListResponseDto;
 import com.example.hotel_booking_service.web.dto.response.HotelResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,11 +23,17 @@ public class HotelController {
 
     private final HotelService hotelService;
 
+//    @GetMapping
+//    @Operation(summary = "получение списка отелей")
+//    @ResponseStatus(HttpStatus.OK)
+//    public List<HotelResponseDto> getHotelList(){
+//        return hotelService.findAll();
+//    }
+
     @GetMapping
-    @Operation(summary = "получение списка отелей")
     @ResponseStatus(HttpStatus.OK)
-    public List<HotelResponseDto> getHotelList(){
-        return hotelService.findAll();
+    public HotelListResponseDto getHotelsByFilter(@Valid HotelFilter hotelFilter){
+        return hotelService.findAllByFilter(hotelFilter);
     }
 
     @GetMapping("/{id}")

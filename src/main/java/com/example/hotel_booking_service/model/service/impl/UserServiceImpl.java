@@ -130,6 +130,11 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(deletedUser);
     }
 
+    @Override
+    public Long getCount() {
+        return 0L;
+    }
+
     private boolean isRegisteredUser(String username, String email){
         return userRepository.existsByUsername(username) || userRepository.existsByEmail(email);
     }

@@ -14,4 +14,5 @@ public class HotelListResponseDto {
     private List<HotelResponseDto> hotels;
     private int pageSize;
     private int pageNumber;
+    private long totalCount;
 }
