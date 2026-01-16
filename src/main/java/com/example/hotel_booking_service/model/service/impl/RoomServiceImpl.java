@@ -4,21 +4,26 @@ import com.example.hotel_booking_service.exception.NoFoundEntityException;
 import com.example.hotel_booking_service.exception.NotChangeDataException;
 import com.example.hotel_booking_service.model.entity.Room;
 import com.example.hotel_booking_service.model.entity.UnavailableDate;
+import com.example.hotel_booking_service.model.filter.RoomFilter;
 import com.example.hotel_booking_service.model.repository.RoomRepository;
 import com.example.hotel_booking_service.model.repository.UnavailableDateRepository;
 import com.example.hotel_booking_service.model.service.HotelService;
 import com.example.hotel_booking_service.model.service.RoomService;
+import com.example.hotel_booking_service.model.specification.RoomSpecification;
 import com.example.hotel_booking_service.web.dto.request.RoomRequestDto;
+import com.example.hotel_booking_service.web.dto.response.RoomListResponseDto;
 import com.example.hotel_booking_service.web.dto.response.RoomResponseDto;
 import com.example.hotel_booking_service.web.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.hotel_booking_service.utils.DateUtils.getDateListBetweenArrivalAndDepartureDates;
 
@@ -87,7 +92,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Long getCount() {
-        return 0L;
+        return roomRepository.count();
     }
 
     @Override
@@ -137,4 +142,20 @@ public class RoomServiceImpl implements RoomService {
         return bookingDates.stream()
                 .anyMatch(d -> unavailableDateRepository.existsByRoomAndUnavailableDate(room, d));
     }
+
+    @Override
+    public RoomListResponseDto findRoomsByFilter(RoomFilter filter) {
+        Page<Room> page = roomRepository.findAll(RoomSpecification.withFilter(filter),
+                PageRequest.of(filter.getPageNumber(), filter.getPageSize()));
+        return new RoomListResponseDto(
+                page.getContent().stream()
+                        .map(roomMapper::toResponseDto)
+                        .toList(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber(),
+                page.getSize()
+        );
+    }
+
 }

@@ -6,11 +6,10 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = HotelFilterValidator.class)
+@Constraint(validatedBy = RoomFilterValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HotelFilterValid {
-
+public @interface RoomFilterValid {
     String message() default "Постраничные поля пусты";
 
     Class<?>[] groups() default {};

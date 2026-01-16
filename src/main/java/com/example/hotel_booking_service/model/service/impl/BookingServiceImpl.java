@@ -14,6 +14,8 @@ import com.example.hotel_booking_service.web.dto.response.BookingResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,5 +106,10 @@ public class BookingServiceImpl implements BookingService {
         response.setArrivalDate(booking.getArrivalDate());
         response.setDepartureDate(booking.getDepartureDate());
         return response;
+    }
+
+    @Override
+    public Page<BookingResponseDto> findAllBookingsByPageable(Pageable pageable) {
+        return bookingRepository.findAll(pageable).map(this::toResponseDto);
     }
 }
