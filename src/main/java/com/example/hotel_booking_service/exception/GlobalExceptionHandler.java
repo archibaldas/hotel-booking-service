@@ -48,10 +48,15 @@ public class GlobalExceptionHandler {
         return getErrorResponse(HttpStatus.FORBIDDEN, e);
     }
 
+    @ExceptionHandler(CsvExportException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleCsvExportException(CsvExportException e){
+        return getErrorResponse(HttpStatus.FORBIDDEN, e);
+    }
 
-//    @ExceptionHandler(Exception.class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public ErrorResponse handleGenericException(Exception ex) {
-//        return getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
-//    }
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGenericException(Exception ex) {
+        return getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
+    }
 }

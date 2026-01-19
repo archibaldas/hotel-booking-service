@@ -8,18 +8,22 @@ import com.example.hotel_booking_service.model.entity.User;
 import com.example.hotel_booking_service.model.entity.UserRole;
 import com.example.hotel_booking_service.model.repository.UserRepository;
 import com.example.hotel_booking_service.model.service.UserService;
+import com.example.hotel_booking_service.statistics.event.StatisticEvent;
 import com.example.hotel_booking_service.web.dto.request.UserRequestDto;
 import com.example.hotel_booking_service.web.dto.response.UserResponseDto;
 import com.example.hotel_booking_service.web.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +36,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.kafka.booking-statistic-topic}")
+    private String statisticTopic;
+
+    private final KafkaTemplate<String, StatisticEvent> kafkaTemplate;
 
     @Override
     public User getCurrentUser() {
@@ -64,6 +73,14 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         role.setUser(user);
         user = userRepository.save(user);
+        kafkaTemplate.send(statisticTopic, new StatisticEvent(
+                null,
+                "USER_REGISTERED",
+                user.getId(),
+                null,
+                null,
+                LocalDateTime.now()
+        ));
         return userMapper.toResponseDto(user);
     }
 

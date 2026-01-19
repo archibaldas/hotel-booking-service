@@ -9,17 +9,20 @@ import com.example.hotel_booking_service.model.repository.BookingRepository;
 import com.example.hotel_booking_service.model.service.BookingService;
 import com.example.hotel_booking_service.model.service.RoomService;
 import com.example.hotel_booking_service.model.service.UserService;
+import com.example.hotel_booking_service.statistics.event.StatisticEvent;
 import com.example.hotel_booking_service.web.dto.request.BookingRequestDto;
 import com.example.hotel_booking_service.web.dto.response.BookingResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,6 +33,10 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final RoomService roomService;
     private final BookingRepository bookingRepository;
+    @Value("${app.kafka.booking-statistic-topic}")
+    private String statisticTopic;
+
+    private final KafkaTemplate<String, StatisticEvent> kafkaTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -46,7 +53,16 @@ public class BookingServiceImpl implements BookingService {
         if(roomService.isExistingPeriod(request.getRoomId(), request.getArrivalDate(), request.getDepartureDate()))
             throw new NotChangeDataException("В периоде с " + request.getArrivalDate() + " по " +
                     request.getDepartureDate() + " для комнаты с Id" + request.getRoomId() + " есть резервированные даты.");
-       return toResponseDto(bookingRepository.save(toEntity(request)));
+        Booking booking = bookingRepository.save(toEntity(request));
+        kafkaTemplate.send(statisticTopic, new StatisticEvent(
+                null,
+                "BOOKING_CREATED",
+                request.getUserId(),
+                booking.getArrivalDate(),
+                booking.getDepartureDate(),
+                LocalDateTime.now()
+        ));
+       return toResponseDto(booking);
     }
 
    @Override
