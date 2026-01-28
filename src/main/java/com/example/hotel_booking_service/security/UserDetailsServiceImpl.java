@@ -1,6 +1,6 @@
 package com.example.hotel_booking_service.security;
 
-import com.example.hotel_booking_service.model.service.UserService;
+import com.example.hotel_booking_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

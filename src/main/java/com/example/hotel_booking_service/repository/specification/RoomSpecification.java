@@ -1,4 +1,4 @@
-package com.example.hotel_booking_service.model.specification;
+package com.example.hotel_booking_service.repository.specification;
 
 import com.example.hotel_booking_service.model.entity.Room;
 import com.example.hotel_booking_service.model.entity.UnavailableDate;

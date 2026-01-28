@@ -1,0 +1,197 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-hotels-booking-tables
+      author: user
+      changes:
+        - createTable:
+            tableName: hotels
+            schemaName: hotel_booking_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: city
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: VARCHAR(300)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: distance_from_center
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rating
+                  type: DOUBLE
+                  defaultValue: 1.0
+              - column:
+                  name: rating_count
+                  type: INTEGER
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: rooms
+            schemaName: hotel_booking_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(500)
+              - column:
+                  name: number
+                  type: INTEGER
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+              - column:
+                  name: max_people
+                  type: INTEGER
+              - column:
+                  name: hotel_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rooms_hotel_id
+                    references: hotel_booking_schema.hotels(id)
+            constraints:
+              - uniqueConstraint:
+                  constraintName: uq_room_hotel_number
+                  columns: hotel_id, number
+
+        - createTable:
+            tableName: users
+            schemaName: hotel_booking_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - createTable:
+            tableName: authority
+            schemaName: hotel_booking_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: authority
+                  type: VARCHAR(50)
+              - column:
+                  name: username
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_authority_user_id
+                    references: hotel_booking_schema.users(id)
+
+        - createTable:
+            tableName: unavailable_dates
+            schemaName: hotel_booking_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: unavailable_date
+                  type: DATE
+              - column:
+                  name: room_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_unavailable_dates_room_id
+                    references: hotel_booking_schema.rooms(id)
+            constraints:
+              - uniqueConstraint:
+                  constraintName: uq_room_id_unavailable_date
+                  columns: room_id, unavailable_date
+
+        - createTable:
+            tableName: booking
+            schemaName: hotel_booking_schema
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: arrival_date
+                  type: DATE
+              - column:
+                  name: departure_date
+                  type: DATE
+              - column:
+                  name: room_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_booking_room_id
+                    references: hotel_booking_schema.rooms(id)
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_booking_user_id
+                    references: hotel_booking_schema.users(id)

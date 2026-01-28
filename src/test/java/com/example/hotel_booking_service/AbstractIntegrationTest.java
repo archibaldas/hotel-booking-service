@@ -2,35 +2,37 @@ package com.example.hotel_booking_service;
 
 import com.example.hotel_booking_service.exception.NoFoundEntityException;
 import com.example.hotel_booking_service.model.entity.*;
-import com.example.hotel_booking_service.model.repository.BookingRepository;
-import com.example.hotel_booking_service.model.repository.HotelRepository;
-import com.example.hotel_booking_service.model.repository.RoomRepository;
-import com.example.hotel_booking_service.model.repository.UserRepository;
-import com.example.hotel_booking_service.model.service.BookingService;
-import com.example.hotel_booking_service.model.service.HotelService;
-import com.example.hotel_booking_service.model.service.RoomService;
-import com.example.hotel_booking_service.model.service.UserService;
-import com.example.hotel_booking_service.web.mapper.HotelMapper;
-import com.example.hotel_booking_service.web.mapper.RoomMapper;
-import com.example.hotel_booking_service.web.mapper.UserMapper;
+import com.example.hotel_booking_service.repository.BookingRepository;
+import com.example.hotel_booking_service.repository.HotelRepository;
+import com.example.hotel_booking_service.repository.RoomRepository;
+import com.example.hotel_booking_service.repository.UserRepository;
+import com.example.hotel_booking_service.service.BookingService;
+import com.example.hotel_booking_service.statistics.event.StatisticRepository;
+import com.example.hotel_booking_service.statistics.listner.StatisticEventListener;
+import com.example.hotel_booking_service.statistics.publisher.EventPublisher;
+import com.example.hotel_booking_service.web.dto.request.BookingRequestDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,10 +51,20 @@ public abstract class AbstractIntegrationTest {
     protected Long adminId;
     protected List<Long> hotelIds;
     protected List<Long> roomIds;
+    protected Long bookingId;
 
     @Autowired
     protected TestDatabaseUtils testDatabaseUtils;
 
+    @Container
+    protected static final KafkaContainer KAFKA = new KafkaContainer(
+            DockerImageName.parse("apache/kafka-native:3.8.0")
+                    .asCompatibleSubstituteFor("apache/kafka")
+    ).withReuse(true);
+
+    @Container
+    protected static final MongoDBContainer MONGO = new MongoDBContainer("mongo:6.0.8")
+            .withReuse(true);
 
     protected static PostgreSQLContainer postgreSQLContainer;
 
@@ -62,6 +74,8 @@ public abstract class AbstractIntegrationTest {
         postgreSQLContainer = (PostgreSQLContainer) new PostgreSQLContainer(postgres).withReuse(true);
 
         postgreSQLContainer.start();
+        KAFKA.start();
+        MONGO.start();
 
     }
 
@@ -77,22 +91,16 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.jpa.properties.hibernate.hbm2ddl.create_namespaces", () -> "true");
 
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+
+        registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
+        registry.add("spring.data.mongodb.uri", MONGO::getReplicaSetUrl);
+
+        registry.add("spring.kafka.consumer.auto-offset-reset", () -> "earliest");
+        registry.add("spring.kafka.consumer.group-id", () -> "test-group");
     }
 
     @Autowired
-    protected WebApplicationContext context;
-
-    @Autowired
     protected MockMvc mockMvc;
-
-    @Autowired
-    protected HotelService hotelService;
-
-    @Autowired
-    protected RoomService roomService;
-
-    @Autowired
-    protected UserService userService;
 
     @Autowired
     protected BookingService bookingService;
@@ -110,23 +118,22 @@ public abstract class AbstractIntegrationTest {
     protected BookingRepository bookingRepository;
 
     @Autowired
-    protected HotelMapper hotelMapper;
+    protected EventPublisher publisher;
 
     @Autowired
-    protected RoomMapper roomMapper;
+    protected StatisticEventListener listener;
+
+    @Value("${app.kafka.booking-statistic-topic}")
+    protected String statisticTopic;
 
     @Autowired
-    protected UserMapper userMapper;
-
+    protected StatisticRepository statisticRepository;
 
     @Autowired
     protected ObjectMapper objectMapper;
 
     @Autowired
     protected PasswordEncoder passwordEncoder;
-
-
-
 
     protected void createUsers(){
         UserRole role = UserRole.from(RoleType.USER);
@@ -197,12 +204,31 @@ public abstract class AbstractIntegrationTest {
                 .toList();
     }
 
+    private void createBooking(){
+
+        LocalDate nowDate = LocalDate.now();
+        LocalDate arrivalDate = nowDate.plusDays(1);
+        LocalDate departureDate = nowDate.plusDays(5);
+
+
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setUserId(userId);
+        requestDto.setRoomId(roomIds.get(3));
+        requestDto.setArrivalDate(arrivalDate);
+        requestDto.setDepartureDate(departureDate);
+
+        com.example.hotel_booking_service.web.dto.response.BookingResponseDto responseDto = bookingService
+                .create(requestDto);
+        bookingId = responseDto.getId();
+    }
+
     @BeforeEach
     @Transactional
     public void start(){
         createHotels();
         createRooms();
         createUsers();
+        createBooking();
     }
 
     @AfterEach

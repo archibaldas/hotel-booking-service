@@ -91,8 +91,8 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     public void whenDeleteUserById_thenReturnNoContent() throws Exception{
-        mockMvc.perform(delete("/api/users/" + userId)
-                        .with(httpBasic(USER_PARAM, USER_PARAM)))
+        mockMvc.perform(delete("/api/users/" + adminId)
+                        .with(httpBasic(ADMIN_PARAM, ADMIN_PARAM)))
                 .andExpect(status().isNoContent());
     }
 }

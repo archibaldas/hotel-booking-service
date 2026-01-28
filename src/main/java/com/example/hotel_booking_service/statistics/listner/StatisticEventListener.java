@@ -1,5 +1,6 @@
 package com.example.hotel_booking_service.statistics.listner;
 
+import com.example.hotel_booking_service.aop.LogExecution;
 import com.example.hotel_booking_service.statistics.event.StatisticEvent;
 import com.example.hotel_booking_service.statistics.event.StatisticRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class StatisticEventListener {
             groupId = "${app.kafka.groupId}",
             containerFactory = "kafkaListenerContainerFactory"
     )
+    @LogExecution
     public void listen(StatisticEvent event){
         log.info("Отловлено событие: {}, запись в базу.", event);
         repository.save(event);

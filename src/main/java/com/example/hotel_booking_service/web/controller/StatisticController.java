@@ -1,5 +1,6 @@
 package com.example.hotel_booking_service.web.controller;
 
+import com.example.hotel_booking_service.aop.LogExecution;
 import com.example.hotel_booking_service.statistics.export.StatisticExportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,7 @@ public class StatisticController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @LogExecution
     public ResponseEntity<byte[]> export() {
         byte[] csv = exportService.exportCsv();
 

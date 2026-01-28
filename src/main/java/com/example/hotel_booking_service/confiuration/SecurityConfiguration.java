@@ -53,9 +53,11 @@ public class SecurityConfiguration {
         log.info(">>> SecurityFilterChain activated");
         http.authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/users/registration").permitAll()
+                        .requestMatchers("/swagger-ui/index.html").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/hotels/**").authenticated()
                         .requestMatchers("/api/rooms/**").authenticated()
+                        .requestMatchers( "/api/statistics/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer:: disable)

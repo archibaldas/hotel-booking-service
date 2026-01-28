@@ -4,7 +4,6 @@ import com.example.hotel_booking_service.AbstractIntegrationTest;
 import com.example.hotel_booking_service.web.dto.request.HotelRequestDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;

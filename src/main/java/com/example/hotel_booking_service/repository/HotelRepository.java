@@ -1,4 +1,4 @@
-package com.example.hotel_booking_service.model.repository;
+package com.example.hotel_booking_service.repository;
 
 import com.example.hotel_booking_service.model.entity.Hotel;
 import org.springframework.data.jpa.repository.JpaRepository;

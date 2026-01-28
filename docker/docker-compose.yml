@@ -69,6 +69,6 @@ services:
 #      SPRING_DATASOURCE_PASSWORD: postgres
 #      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
 #    restart: unless-stopped
-#
+
 volumes:
   postgres_data:

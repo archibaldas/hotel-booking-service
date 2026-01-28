@@ -10,11 +10,11 @@ spring:
     name: HotelBookingService
 
   datasource:
-    #url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/hotel_booking_db}
+#    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/hotel_booking_db}
     url: jdbc:postgresql://localhost:5432/hotel_booking_db
-    #username: ${SPRING_DATASOURCE_USERNAME:postgres}
+#    username: ${SPRING_DATASOURCE_USERNAME:postgres}
     username: postgres
-    #password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+#    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -22,9 +22,14 @@ spring:
       hibernate:
         default_schema: hotel_booking_schema
     hibernate:
-      #ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
-      ddl-auto: update
-    show-sql: false
+#      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+      ddl-auto: validate
+      show-sql: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog-master.yaml
+    drop-first: false
   kafka:
     bootstrap-servers: localhost:9092
 
@@ -42,3 +47,9 @@ logging:
   level:
     org.springframework: INFO
     com.example.hotel_booking_service: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

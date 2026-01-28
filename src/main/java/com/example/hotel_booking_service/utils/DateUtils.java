@@ -1,6 +1,5 @@
 package com.example.hotel_booking_service.utils;
 
-import com.example.hotel_booking_service.exception.NotChangeDataException;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;

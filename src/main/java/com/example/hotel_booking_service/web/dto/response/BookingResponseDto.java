@@ -7,8 +7,8 @@ import java.time.LocalDate;
 @Data
 public class BookingResponseDto{
   private Long id;
-  private UserResponseDto userResponseDto;
-  private RoomResponseDto roomResponseDto;
+  private UserResponseDto user;
+  private RoomResponseDto room;
   private LocalDate arrivalDate;
   private LocalDate departureDate;
 }

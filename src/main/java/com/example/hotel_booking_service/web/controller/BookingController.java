@@ -1,6 +1,7 @@
 package com.example.hotel_booking_service.web.controller;
 
-import com.example.hotel_booking_service.model.service.BookingService;
+import com.example.hotel_booking_service.aop.LogExecution;
+import com.example.hotel_booking_service.service.BookingService;
 import com.example.hotel_booking_service.web.dto.request.BookingRequestDto;
 import com.example.hotel_booking_service.web.dto.response.BookingResponseDto;
 import jakarta.validation.Valid;
@@ -11,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("api/booking")
 @RequiredArgsConstructor
@@ -22,6 +21,7 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @LogExecution
     public BookingResponseDto bookingRoom(@Valid @RequestBody BookingRequestDto requestDto){
         return bookingService.create(requestDto);
     }
@@ -29,6 +29,7 @@ public class BookingController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @LogExecution
     public Page<BookingResponseDto> getAllBookings(@RequestParam(defaultValue = "0")int page,
                                                    @RequestParam(defaultValue = "10") int size){
         return bookingService.findAllBookingsByPageable(PageRequest.of(page, size));
